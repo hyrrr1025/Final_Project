@@ -17,7 +17,7 @@ public class Player : MonoBehaviour
     float velocityXSmoothing;
 
     Controller2D controller;
-
+    // hyr is very nb!
     void Start()
     {
         controller = GetComponent<Controller2D>();

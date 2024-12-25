@@ -18,6 +18,12 @@ public class Player : MonoBehaviour
 
     Controller2D controller;
 
+
+    Animator m_Animator;
+    Vector2 m_Movement;
+    private bool IsJumping;
+
+
     void Start()
     {
         controller = GetComponent<Controller2D>();
@@ -25,6 +31,11 @@ public class Player : MonoBehaviour
         gravity = -(2 * jumpHeight) / Mathf.Pow(timeToJumpApex, 2);
         jumpVelocity = Mathf.Abs(gravity) * timeToJumpApex;
         print("Gravity: " + gravity + "  Jump Velocity: " + jumpVelocity);
+
+
+        m_Animator = GetComponent<Animator>();
+
+
     }
 
     void Update()
@@ -33,6 +44,7 @@ public class Player : MonoBehaviour
         if (controller.collisions.above || controller.collisions.below)
         {
             velocity.y = 0;
+            IsJumping = false;
         }
 
         Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
@@ -40,11 +52,27 @@ public class Player : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space) && controller.collisions.below)
         {
             velocity.y = jumpVelocity;
+            IsJumping = true;
         }
 
         float targetVelocityX = input.x * moveSpeed;
         velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref velocityXSmoothing, (controller.collisions.below) ? accelerationTimeGrounded : accelerationTimeAirborne);
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
+    }
+
+    void FixedUpdate()
+    {
+        float horizontal = Input.GetAxis("Horizontal");
+        float vertical = Input.GetAxis("Vertical");
+
+        m_Movement.Set(horizontal, vertical);
+        m_Movement.Normalize();
+
+        bool hasHorizontalInput = !Mathf.Approximately(horizontal, 0f);
+        bool hasVerticalInput = !Mathf.Approximately(vertical, 0f);
+        bool isWalking = hasHorizontalInput;
+        m_Animator.SetBool("IsWalking", isWalking);
+
     }
 }

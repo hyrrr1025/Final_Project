@@ -21,6 +21,7 @@ public class Player : MonoBehaviour
 
     Animator m_Animator;
     Vector2 m_Movement;
+
     private bool IsJumping;
 
 
@@ -44,8 +45,15 @@ public class Player : MonoBehaviour
         if (controller.collisions.above || controller.collisions.below)
         {
             velocity.y = 0;
-            IsJumping = false;
         }
+
+
+        if (controller.collisions.below)
+        {
+            IsJumping = false;
+            m_Animator.SetBool("IsJumping", IsJumping);
+        }
+
 
         Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
 
@@ -53,6 +61,12 @@ public class Player : MonoBehaviour
         {
             velocity.y = jumpVelocity;
             IsJumping = true;
+            m_Animator.SetBool("IsJumping", IsJumping);
+        }
+
+        else
+        {
+            IsJumping = false;
         }
 
         float targetVelocityX = input.x * moveSpeed;

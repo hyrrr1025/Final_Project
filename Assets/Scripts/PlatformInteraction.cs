@@ -1,0 +1,56 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class PlatformInteraction : MonoBehaviour
+{
+    public GameObject platformA;    // 平台 A
+    public GameObject player;       // 人物
+    public GameObject Newobject;        // 物体 B 的预制件
+    public float delay = 2.0f;      // 延迟时间
+
+    private bool isCharacterOnPlatform = false;  // 检测人物是否在平台上
+    private bool isSpawning = false;             // 防止多次调用 SpawnAndDropObjectB
+    private GameObject spawnedNewobject = null;      // 记录生成的唯一 Storm 实例
+
+    void OnCollisionEnter2D(Collision2D collision)
+    {
+        // 确保碰撞对象是玩家且未开始生成 Storm
+        if (collision.gameObject == player && !isSpawning && spawnedNewobject == null)
+        {
+            isCharacterOnPlatform = true;
+            isSpawning = true; // 标记为正在生成
+            Invoke(nameof(SpawnAndDropObjectB), delay);
+        }
+    }
+
+    void SpawnAndDropObjectB()
+    {
+        // 确保玩家仍在平台上，且未生成 Storm
+        if (isCharacterOnPlatform && spawnedNewobject == null)
+        {
+            // 在平台上方生成物体 B
+            Vector2 spawnPosition = new Vector2(platformA.transform.position.x, platformA.transform.position.y + 5f);
+            spawnedNewobject = Instantiate(Newobject, spawnPosition, Quaternion.identity);
+
+            // 设置生成物体的名称
+            spawnedNewobject.name = "Newobject";  // 这里可以根据需要命名
+
+            // 给物体 B 添加物理效果，让它下落
+            Rigidbody2D rb = spawnedNewobject.AddComponent<Rigidbody2D>();
+
+            // 设置物理属性
+            rb.gravityScale = 1f; // 设置重力缩放
+            rb.mass = 5f;         // 设置质量
+            rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous; // 防止穿透
+
+            if (platformA.GetComponent<Rigidbody2D>() == null)
+            {
+                Rigidbody2D platformRb = platformA.AddComponent<Rigidbody2D>();
+                platformRb.gravityScale = 1f;  // 设置平台的重力
+                platformRb.mass = 10f;         // 设置平台的质量
+                platformRb.collisionDetectionMode = CollisionDetectionMode2D.Continuous; // 防止穿透
+            }
+        }
+      }
+}
